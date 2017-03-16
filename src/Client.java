@@ -42,13 +42,9 @@ public class Client {
             }
         }
 
-        private void parseMessage(DataInputStream dos) throws IOException{
-            String line = dos.readUTF();
+        private void parseMessage(DataInputStream in) throws IOException{
 
-            if(line.length()<1)
-                return;
-
-            char cmd = line.charAt(0);
+            char cmd = in.readChar();
 
             switch(cmd){
                 case 'a' :
