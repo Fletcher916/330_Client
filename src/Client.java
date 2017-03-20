@@ -36,10 +36,10 @@ public class Client {
             while(stayConnected){
                 try{
                     s1in = sockID.getInputStream();
-                    DataInputStream dos = new DataInputStream (s1in);
+                    DataInputStream dis = new DataInputStream (s1in);
 
-                    if(dos.available() > 0){
-                        parseMessageFromServer(dos);
+                    if(dis.available() > 0){
+                        parseMessageFromServer(dis);
                     }
                 }
                 catch(IOException e){
@@ -81,7 +81,7 @@ public class Client {
                     break;
                 case 'w' : //TODO
                     break;
-                default  : recievedTransmission(protocol_formed_charArray);
+                default  : receivedTransmission(protocol_formed_charArray);
                     break;
             }
         }
@@ -89,9 +89,10 @@ public class Client {
         /**
          * Receives a packet from server with '\0' as the cmd
          * Parses the packet and forms a message that is printed to the clients screen in which shows the username of the person who sent the packet followed by their message.
-         * @param protocolPacketRecieved
+         * @param protocolPacketReceived
          */
-        public void recievedTransmission(char[] protocolPacketRecieved){
+        public void receivedTransmission(char[] protocolPacketReceived){
+
             String sender="";
             String temp="";
             String message="";
@@ -99,18 +100,18 @@ public class Client {
 
             //Retrieves the user's name
             for(int i=1; i<20; i++){
-                if(protocolPacketRecieved[i]=='\0')
+                if(protocolPacketReceived[i]=='\0')
                     break;
 
-                sender+= protocolPacketRecieved[i];
+                sender+= protocolPacketReceived[i];
             }
 
             //Retrieves the length of the message as a string
             for(int i = 21; i<28; i++){
-                if(protocolPacketRecieved[i]=='\0')
+                if(protocolPacketReceived[i]=='\0')
                     break;
 
-                temp += protocolPacketRecieved[i];
+                temp += protocolPacketReceived[i];
             }
 
             //Parses the aboves string into an int
@@ -122,16 +123,15 @@ public class Client {
             }
 
             //Retrieves the message
-            for(int i = 29; i < length_of_message; i++){
-                if(protocolPacketRecieved[i]=='\0')
+            for(int i = 29; i < length_of_message+29; i++){
+                if(protocolPacketReceived[i]=='\0')
                     break;
-
-                message += protocolPacketRecieved[i];
+                message += protocolPacketReceived[i];
             }
 
-            message = sender + ": " + message;
+            String themessage = sender + ": " + message;
 
-            System.out.println(message);
+            System.out.println(themessage);
         }
 
         /**
@@ -139,11 +139,11 @@ public class Client {
          *   returns a char[]
          */
         public char[] DataInput_to_charArray(DataInputStream in){
-            char[] buff = new char[2000];
+            char[] buff = new char[262173];
             int counter =0;
 
             try {
-                while (in.available() > 0) {
+                for(int i=0; i< 262173; i++) {
                     buff[counter] = in.readChar();
                     counter ++;
                 }
@@ -152,23 +152,7 @@ public class Client {
                 return null;
             }
 
-            char[] protocol_format_chararray = new char[counter];
-
-            for(int i = 0; i< counter; i++){
-                protocol_format_chararray[i] = buff[i];
-            }
-
-
-            //Use this to see if the protocol is being received correctly.
-            //for(char c : protocol_format_chararray){
-                //if(c != '\0'){
-                    //System.out.print(c);
-                //}
-                //else
-                    //System.out.print('~');
-            //}
-
-            return protocol_format_chararray;
+            return buff;
 
         }
     }
@@ -257,10 +241,10 @@ public class Client {
          *   returns a char[] to be sent to the server.
          **/
         public char[] protocolFormer(char cmd, String options, String message){
-            char [] protocol = new char[29 + message.length()];
+            char [] protocol = new char[262173];
 
             protocol[0]=cmd;
-            for(int i=1; i<20; i++){
+            for(int i=1; i<21; i++){
                 if(options!= null && i < options.length()){
                     protocol[i]=options.charAt(i-1);
                 }
@@ -272,7 +256,7 @@ public class Client {
 
             String message_size = Integer.toString(message.length());
 
-            for(int i = 21; i<28; i++){
+            for(int i = 21; i<29; i++){
                 if(i-21 < message_size.length()){
                     protocol[i]= message_size.charAt(i-21);
                 }
@@ -282,8 +266,11 @@ public class Client {
                 }
             }
 
-            for(int i = 29; i < message.length()+29; i++){
-                protocol[i]=message.charAt(i-29);
+            for(int i = 29; i < 262173; i++){
+                if(i-29 < message.length())
+                    protocol[i]=message.charAt(i-29);
+                else
+                    protocol[i]='\0';
             }
 
             // Use this for testing if the protocol is outputting the correct format.
@@ -313,7 +300,7 @@ public class Client {
                     d_out.writeChar(protocol_to_server[i]);
                 }
 
-                d_out.close();
+
 
             }
             catch(IOException e){
