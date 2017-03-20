@@ -207,7 +207,7 @@ public class Client {
                             break;
                 case 's' : //TODO
                             break;
-                case 'w' : //TODO
+                case 'w' :  sendPrivateMessage(line);
                             break;
                 default  : //TODO
                             break;
@@ -232,6 +232,33 @@ public class Client {
                 message= line.substring(line.indexOf(" ")+1, line.length());
                 char[] toServer = protocolFormer('r',null, message);
                 sendToServer(toServer);
+            }
+        }
+        
+         /**
+         * Creates and sends protocol char[] indicating a message to the specified user.
+         *
+         */
+        public void sendPrivateMessage(String line){
+
+            if(line.length() < 3)
+                return;
+
+            String message = null;
+            String option  = null;
+
+            // removes the w in front of the message and the following space.
+            if(line.contains(" ")){
+                message = line.substring(line.indexOf(" ")+1, line.length());
+                
+                // removes the w in front of the message and the following space.
+                if(message.contains(" ")){
+                	option = message.substring(0, message.indexOf(" "));
+                	message= message.substring(message.indexOf(" ")+1, message.length());
+                	
+                    char[] toServer = protocolFormer('w',option, message);
+                    sendToServer(toServer);
+                }
             }
         }
 
