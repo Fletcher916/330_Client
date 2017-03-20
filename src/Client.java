@@ -53,7 +53,7 @@ public class Client {
 
             char cmd = protocol_formed_charArray[0];
 
-            //NOTE SOME OF THESE COMMANDS ARN'T IMPLEMENTED PLEASE REFER TO THE PROTOCOL DOCUMENT.
+            //NOTE SOME OF THESE COMMANDS ARE NOT IMPLEMENTED PLEASE REFER TO THE PROTOCOL DOCUMENT.
             switch(cmd){
                 case 'a' : //TODO
                     break;
@@ -75,15 +75,63 @@ public class Client {
                     break;
                 case 'n' : //TODO
                     break;
-                case 'r' : //TODO
+                case 'r' : //Doesn't exist because this protocol is questionable
                     break;
                 case 's' : //TODO
                     break;
                 case 'w' : //TODO
                     break;
-                default  : //TODO
+                default  : recievedTransmission(protocol_formed_charArray);
                     break;
             }
+        }
+
+        /**
+         * Receives a packet from server with '\0' as the cmd
+         * Parses the packet and forms a message that is printed to the clients screen in which shows the username of the person who sent the packet followed by their message.
+         * @param protocolPacketRecieved
+         */
+        public void recievedTransmission(char[] protocolPacketRecieved){
+            String sender="";
+            String temp="";
+            String message="";
+            int length_of_message=0;
+
+            //Retrieves the user's name
+            for(int i=1; i<20; i++){
+                if(protocolPacketRecieved[i]=='\0')
+                    break;
+
+                sender+= protocolPacketRecieved[i];
+            }
+
+            //Retrieves the length of the message as a string
+            for(int i = 21; i<28; i++){
+                if(protocolPacketRecieved[i]=='\0')
+                    break;
+
+                temp += protocolPacketRecieved[i];
+            }
+
+            //Parses the aboves string into an int
+            try{
+                length_of_message = Integer.parseInt(temp);
+            }
+            catch(NumberFormatException e){
+                e.printStackTrace();
+            }
+
+            //Retrieves the message
+            for(int i = 29; i < length_of_message; i++){
+                if(protocolPacketRecieved[i]=='\0')
+                    break;
+
+                message += protocolPacketRecieved[i];
+            }
+
+            message = sender + ": " + message;
+
+            System.out.println(message);
         }
 
         /**
